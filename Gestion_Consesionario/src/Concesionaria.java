@@ -14,6 +14,10 @@ public class Concesionaria {
         this.inventario = new ArrayList<>();
         this.storageFile = new File(storageFilePath);
         
+        cargarDelArchivo();
+    }
+
+    private void cargarDelArchivo() {
         loadFromFile();
     }
 
