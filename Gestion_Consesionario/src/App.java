@@ -1,4 +1,3 @@
-// src/App.java
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
@@ -7,7 +6,7 @@ public class App {
     private static final String STORAGE_FILE = "inventario.csv";
 
     public static void main(String[] args) {
-        Locale.setDefault(Locale.US); // para consistencia en números
+        Locale.setDefault(Locale.US);
         Concesionaria c = new Concesionaria("Automóviles del Futuro", STORAGE_FILE);
 
         System.out.println("======================================");
@@ -60,7 +59,7 @@ public class App {
         System.out.println("6) Salir");
     }
 
-    // Muestra una "tabla" formateada en consola
+    
     private static void listarInventarioTabla(List<Auto> lista) {
         if (lista.isEmpty()) {
             System.out.println("-- No hay autos para mostrar --");
@@ -85,7 +84,7 @@ public class App {
             int anio = Integer.parseInt(sc.nextLine().trim());
             System.out.print("Precio (ej. 18000.00): ");
             double precio = Double.parseDouble(sc.nextLine().trim());
-            boolean disponible = true; // al crear, por defecto disponible
+            boolean disponible = true; 
 
             Auto nuevo = new Auto(marca, modelo, anio, precio, disponible);
             c.agregarAuto(nuevo);
