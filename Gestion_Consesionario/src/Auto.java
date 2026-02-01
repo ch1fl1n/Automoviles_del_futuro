@@ -1,6 +1,4 @@
 public class Auto extends Vehiculo {
-    private static int nextId = 1;
-
     private int numPuertas;
     private String tipoCombustible;
 
@@ -42,7 +40,7 @@ public class Auto extends Vehiculo {
     }
 
     public static void setNextId(int nextId) {
-        Auto.nextId = nextId;
+        // No se usa aquí, el contador está en Vehiculo
     }
 
     @Override
