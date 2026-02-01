@@ -1,4 +1,3 @@
-// src/Concesionaria.java
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,23 +8,23 @@ public class Concesionaria {
     private final List<Auto> inventario;
     private final File storageFile;
 
-    // archivo por defecto inventario.csv en la carpeta del proyecto
+   
     public Concesionaria(String nombre, String storageFilePath) {
         this.nombre = nombre;
         this.inventario = new ArrayList<>();
         this.storageFile = new File(storageFilePath);
-        // intentar cargar inventario al iniciar
+        
         loadFromFile();
     }
 
-    // Agregar un auto al inventario (usa el constructor de Auto que asigna ID automáticamente)
+    
     public void agregarAuto(Auto auto) {
         if (auto == null) throw new IllegalArgumentException("Auto no puede ser null");
         inventario.add(auto);
-        saveToFile(); // guardamos cada cambio
+        saveToFile(); 
     }
 
-    // Listar autos disponibles
+    
     public List<Auto> listarAutosDisponibles() {
         List<Auto> disponibles = new ArrayList<>();
         for (Auto a : inventario) {
@@ -34,17 +33,16 @@ public class Concesionaria {
         return disponibles;
     }
 
-    // Listar todos
+   
     public List<Auto> listarTodos() {
         return new ArrayList<>(inventario);
     }
 
-    // Buscar por ID
     public Optional<Auto> buscarPorId(int id) {
         return inventario.stream().filter(a -> a.getId() == id).findFirst();
     }
 
-    // Vender auto por id (verifica disponibilidad)
+   
     public boolean venderAuto(int id) {
         Optional<Auto> opt = buscarPorId(id);
         if (opt.isEmpty()) return false;
@@ -55,7 +53,7 @@ public class Concesionaria {
         return true;
     }
 
-    // Actualizar precio por id (usa método updatePrice del Auto)
+    
     public boolean actualizarPrecioAuto(int id, double nuevoPrecio) {
         Optional<Auto> opt = buscarPorId(id);
         if (opt.isEmpty()) return false;
@@ -102,7 +100,7 @@ public class Concesionaria {
                 cargados.add(a);
                 if (id > maxId) maxId = id;
             }
-            // reemplazamos inventario y ajustamos nextId
+            
             inventario.clear();
             inventario.addAll(cargados);
             Auto.setNextId(maxId + 1);
