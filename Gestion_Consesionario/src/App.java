@@ -14,40 +14,28 @@ public class App {
         System.out.println("  ¡Bienvenido a Automóviles del Futuro!");
         System.out.println("======================================");
 
-        Scanner sc = new Scanner(System.in);
+        try (Scanner sc = new Scanner(System.in)) {
 
-        boolean salir = false;
-        while (!salir) {
-            mostrarMenu();
-            System.out.print("Seleccione una opción: ");
-            String opt = sc.nextLine().trim();
-            switch (opt) {
-                case "1":
-                    listarInventarioTabla(c.listarTodos());
-                    break;
-                case "2":
-                    listarInventarioTabla(c.listarAutosDisponibles());
-                    break;
-                case "3":
-                    agregarAutoInteractivo(c, sc);
-                    break;
-                case "4":
-                    venderAutoInteractivo(c, sc);
-                    break;
-                case "5":
-                    actualizarPrecioInteractivo(c, sc);
-                    break;
-                case "6":
-                    System.out.println("Guardando y saliendo...");
-                    salir = true;
-                    break;
-                default:
-                    System.out.println("Opción inválida. Intente de nuevo.");
+            boolean salir = false;
+            while (!salir) {
+                mostrarMenu();
+                System.out.print("Seleccione una opción: ");
+                String opt = sc.nextLine().trim();
+                switch (opt) {
+                    case "1" -> listarInventarioTabla(c.listarTodos());
+                    case "2" -> listarInventarioTabla(c.listarAutosDisponibles());
+                    case "3" -> agregarAutoInteractivo(c, sc);
+                    case "4" -> venderAutoInteractivo(c, sc);
+                    case "5" -> actualizarPrecioInteractivo(c, sc);
+                    case "6" -> {
+                        System.out.println("Guardando y saliendo...");
+                        salir = true;
+                    }
+                    default -> System.out.println("Opción inválida. Intente de nuevo.");
+                }
+                System.out.println();
             }
-            System.out.println();
         }
-
-        sc.close();
     }
 
     private static void mostrarMenu() {
