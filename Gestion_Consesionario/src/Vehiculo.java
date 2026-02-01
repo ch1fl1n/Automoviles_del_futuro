@@ -17,7 +17,7 @@ public abstract class Vehiculo {
         this.disponible = disponible;
     }
 
-    // Encapsulamiento: getters y setters
+    
     public int getId() { return id; }
     public String getMarca() { return marca; }
     public void setMarca(String marca) { this.marca = marca; }
@@ -26,11 +26,11 @@ public abstract class Vehiculo {
     public int getAnio() { return anio; }
     public void setAnio(int anio) { this.anio = anio; }
     public double getPrecio() { return precio; }
-    protected void setPrecio(double precio) { this.precio = precio; } // protegido para control desde subclases
+    protected void setPrecio(double precio) { this.precio = precio; } 
     public boolean isDisponible() { return disponible; }
     public void setDisponible(boolean disponible) { this.disponible = disponible; }
 
-    // Método que deben implementar las subclases para devolver información detallada
+    
     public abstract String getDetalles();
 
     @Override
