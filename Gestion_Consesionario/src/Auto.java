@@ -68,7 +68,7 @@ public class Auto {
 
     private String escapeCSV(String s) {
         if (s == null) return "";
-        return s.replace(";", ","); /
+        return s.replace(";", ","); 
     }
 
    
