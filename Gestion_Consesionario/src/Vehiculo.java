@@ -17,6 +17,17 @@ public abstract class Vehiculo {
         this.disponible = disponible;
     }
 
+    // Constructor para cargar desde persistencia con ID específico
+    public Vehiculo(int id, String marca, String modelo, int anio, double precio, boolean disponible) {
+        this.id = id;
+        this.marca = marca;
+        this.modelo = modelo;
+        this.anio = anio;
+        this.precio = precio;
+        this.disponible = disponible;
+        if (id >= contadorIds) contadorIds = id + 1;
+    }
+
     
     public int getId() { return id; }
     public String getMarca() { return marca; }
