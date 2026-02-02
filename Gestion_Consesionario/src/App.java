@@ -1,114 +1,206 @@
-
+import java.awt.*;
 import java.util.List;
 import java.util.Locale;
-import java.util.Scanner;
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.table.*;
 
 public class App {
+
     private static final String STORAGE_FILE = "inventario.csv";
+    private static Concesionaria concesionaria;
+
+    private static final Color AZUL = new Color(18, 76, 163);
+    private static final Color AZUL_CARD = new Color(33, 150, 243);
+    private static final Color BG = new Color(245, 248, 252);
 
     public static void main(String[] args) {
         Locale.setDefault(Locale.US);
-        Concesionaria c = new Concesionaria("Automóviles del Futuro", STORAGE_FILE);
+        concesionaria = new Concesionaria("Automóviles del Futuro", STORAGE_FILE);
+        SwingUtilities.invokeLater(App::ui);
+    }
 
-        System.out.println("======================================");
-        System.out.println("  ¡Bienvenido a Automóviles del Futuro!");
-        System.out.println("======================================");
+    private static void ui() {
+        JFrame f = new JFrame("Automóviles del Futuro");
+        f.setSize(900, 560);
+        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        f.setLocationRelativeTo(null);
+        f.setLayout(new BorderLayout());
 
-        try (Scanner sc = new Scanner(System.in)) {
+        // ===== HEADER APP STYLE =====
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(AZUL);
+        header.setBorder(new EmptyBorder(18, 25, 18, 25));
 
-            boolean salir = false;
-            while (!salir) {
-                mostrarMenu();
-                System.out.print("Seleccione una opción: ");
-                String opt = sc.nextLine().trim();
-                switch (opt) {
-                    case "1" -> listarInventarioTabla(c.listarTodos());
-                    case "2" -> listarInventarioTabla(c.listarAutosDisponibles());
-                    case "3" -> agregarAutoInteractivo(c, sc);
-                    case "4" -> venderAutoInteractivo(c, sc);
-                    case "5" -> actualizarPrecioInteractivo(c, sc);
-                    case "6" -> {
-                        System.out.println("Guardando y saliendo...");
-                        salir = true;
-                    }
-                    default -> System.out.println("Opción inválida. Intente de nuevo.");
-                }
-                System.out.println();
+        JLabel title = new JLabel("AUTOMÓVILES DEL FUTURO");
+        title.setForeground(Color.WHITE);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 22));
+
+        JLabel sub = new JLabel("Sistema de Gestión de Inventario");
+        sub.setForeground(new Color(210, 230, 255));
+        sub.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+
+        JPanel titles = new JPanel(new GridLayout(2,1));
+        titles.setOpaque(false);
+        titles.add(title);
+        titles.add(sub);
+
+        header.add(titles, BorderLayout.WEST);
+
+        // ===== DASHBOARD =====
+        JPanel grid = new JPanel(new GridLayout(2,3,22,22));
+        grid.setBackground(BG);
+        grid.setBorder(new EmptyBorder(30,30,30,30));
+
+        grid.add(card("📋", "Inventario", () ->
+                mostrarTabla(concesionaria.listarTodos(), "Inventario Completo")));
+
+        grid.add(card("✅", "Disponibles", () ->
+                mostrarTabla(concesionaria.listarAutosDisponibles(), "Autos Disponibles")));
+
+        grid.add(card("➕", "Agregar Auto", App::agregar));
+
+        grid.add(card("💰", "Vender Auto", App::vender));
+
+        grid.add(card("✏️", "Actualizar Precio", App::precio));
+
+        grid.add(card("🚪", "Salir", () -> System.exit(0)));
+
+        f.add(header, BorderLayout.NORTH);
+        f.add(grid, BorderLayout.CENTER);
+        f.setVisible(true);
+    }
+
+    // ===== CARD STYLE BUTTON =====
+
+    private static JPanel card(String icon, String text, Runnable action) {
+        JPanel p = new JPanel(new BorderLayout());
+        p.setBackground(AZUL_CARD);
+        p.setBorder(new CompoundBorder(
+                new LineBorder(new Color(0,0,0,30),1,true),
+                new EmptyBorder(18,18,18,18)
+        ));
+
+        JLabel ic = new JLabel(icon, JLabel.CENTER);
+        ic.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 36));
+        ic.setForeground(Color.WHITE);
+
+        JLabel tx = new JLabel(text, JLabel.CENTER);
+        tx.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        tx.setForeground(Color.WHITE);
+
+        p.add(ic, BorderLayout.CENTER);
+        p.add(tx, BorderLayout.SOUTH);
+
+        p.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        p.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                action.run();
             }
-        }
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                p.setBackground(AZUL.darker());
+            }
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                p.setBackground(AZUL_CARD);
+            }
+        });
+
+        return p;
     }
 
-    private static void mostrarMenu() {
-        System.out.println("Menú:");
-        System.out.println("1) Ver inventario completo");
-        System.out.println("2) Ver autos disponibles");
-        System.out.println("3) Agregar un auto nuevo");
-        System.out.println("4) Vender un auto (marcar como vendido)");
-        System.out.println("5) Actualizar precio de un auto");
-        System.out.println("6) Salir");
+    // ===== TABLE MODERNA =====
+
+    private static void mostrarTabla(List<Auto> lista, String titulo) {
+        String[] cols = {"ID","Marca","Modelo","Año","Precio","Disponible"};
+        DefaultTableModel m = new DefaultTableModel(cols,0);
+
+        for (Auto a: lista) {
+            m.addRow(new Object[]{
+                    a.getId(),
+                    a.getMarca(),
+                    a.getModelo(),
+                    a.getAnio(),
+                    String.format("$%.2f", a.getPrecio()),
+                    a.isDisponible() ? "Sí":"No"
+            });
+        }
+
+        JTable t = new JTable(m);
+        t.setRowHeight(30);
+        t.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        t.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
+        t.getTableHeader().setBackground(AZUL);
+        t.getTableHeader().setForeground(Color.WHITE);
+
+        DefaultTableCellRenderer c = new DefaultTableCellRenderer();
+        c.setHorizontalAlignment(JLabel.CENTER);
+        for(int i=0;i<t.getColumnCount();i++)
+            t.getColumnModel().getColumn(i).setCellRenderer(c);
+
+        JScrollPane sp = new JScrollPane(t);
+
+        JFrame w = new JFrame(titulo);
+        w.setSize(720,380);
+        w.add(sp);
+        w.setLocationRelativeTo(null);
+        w.setVisible(true);
     }
 
-    
-    private static void listarInventarioTabla(List<Auto> lista) {
-        if (lista.isEmpty()) {
-            System.out.println("-- No hay autos para mostrar --");
-            return;
-        }
-        String fmtHeader = "%-4s | %-12s | %-12s | %-6s | %-11s | %-10s%n";
-        String fmtRow    = "%-4d | %-12s | %-12s | %-6d | $%10.2f | %-10s%n";
-        System.out.printf(fmtHeader, "ID", "Marca", "Modelo", "Año", "Precio", "Disponible");
-        System.out.println("--------------------------------------------------------------------");
-        for (Auto a : lista) {
-            System.out.printf(fmtRow, a.getId(), a.getMarca(), a.getModelo(), a.getAnio(), a.getPrecio(), a.isDisponible() ? "Sí" : "No");
-        }
-    }
+    // ===== FORM DIALOGS =====
 
-    private static void agregarAutoInteractivo(Concesionaria c, Scanner sc) {
+    private static void agregar() {
         try {
-            System.out.print("Marca: ");
-            String marca = sc.nextLine().trim();
-            System.out.print("Modelo: ");
-            String modelo = sc.nextLine().trim();
-            System.out.print("Año de fabricación (ej. 2022): ");
-            int anio = Integer.parseInt(sc.nextLine().trim());
-            System.out.print("Precio (ej. 18000.00): ");
-            double precio = Double.parseDouble(sc.nextLine().trim());
-            boolean disponible = true; 
+            JTextField marca = new JTextField();
+            JTextField modelo = new JTextField();
+            JTextField anio = new JTextField();
+            JTextField precio = new JTextField();
 
-            Auto nuevo = new Auto(marca, modelo, anio, precio, disponible);
-            c.agregarAuto(nuevo);
-            System.out.println("Auto agregado con éxito. ID asignado: " + nuevo.getId());
-        } catch (NumberFormatException e) {
-            System.out.println("Entrada inválida: asegúrese de escribir números válidos para año y precio.");
-        } catch (Exception e) {
-            System.out.println("Error al agregar auto: " + e.getMessage());
+            Object[] msg = {
+                    "Marca:", marca,
+                    "Modelo:", modelo,
+                    "Año:", anio,
+                    "Precio:", precio
+            };
+
+            if (JOptionPane.showConfirmDialog(null,msg,"Nuevo Auto",
+                    JOptionPane.OK_CANCEL_OPTION)==0) {
+
+                Auto a = new Auto(
+                        marca.getText(),
+                        modelo.getText(),
+                        Integer.parseInt(anio.getText()),
+                        Double.parseDouble(precio.getText()),
+                        true
+                );
+                concesionaria.agregarAuto(a);
+                JOptionPane.showMessageDialog(null,"Auto creado ID "+a.getId());
+            }
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null,"Datos inválidos");
         }
     }
 
-    private static void venderAutoInteractivo(Concesionaria c, Scanner sc) {
+    private static void vender() {
         try {
-            System.out.print("Ingrese ID del auto a vender: ");
-            int id = Integer.parseInt(sc.nextLine().trim());
-            boolean ok = c.venderAuto(id);
-            if (ok) System.out.println("Auto marcado como vendido.");
-            else System.out.println("No se pudo vender: ID no existe o auto ya estaba vendido.");
-        } catch (NumberFormatException e) {
-            System.out.println("ID inválido.");
+            int id = Integer.parseInt(JOptionPane.showInputDialog("ID a vender"));
+            JOptionPane.showMessageDialog(null,
+                    concesionaria.venderAuto(id) ?
+                            "Venta registrada" : "No disponible");
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null,"ID inválido");
         }
     }
 
-    private static void actualizarPrecioInteractivo(Concesionaria c, Scanner sc) {
+    private static void precio() {
         try {
-            System.out.print("Ingrese ID del auto a actualizar precio: ");
-            int id = Integer.parseInt(sc.nextLine().trim());
-            System.out.print("Ingrese nuevo precio: ");
-            double nuevo = Double.parseDouble(sc.nextLine().trim());
-            boolean ok = c.actualizarPrecioAuto(id, nuevo);
-            if (ok) System.out.println("Precio actualizado correctamente.");
-            else System.out.println("No se pudo actualizar el precio (ID no existe o validación falló).");
-        } catch (NumberFormatException e) {
-            System.out.println("Entrada inválida.");
+            int id = Integer.parseInt(JOptionPane.showInputDialog("ID"));
+            double p = Double.parseDouble(JOptionPane.showInputDialog("Nuevo precio"));
+            JOptionPane.showMessageDialog(null,
+                    concesionaria.actualizarPrecioAuto(id,p) ?
+                            "Precio actualizado":"Error");
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null,"Datos inválidos");
         }
     }
 }
- 
